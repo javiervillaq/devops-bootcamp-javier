@@ -54,7 +54,7 @@ pipeline {
                 # Salidas de validación
                 echo "PASSWORD TEMPORAL: ${PASS_TEMPORAL}" > outputs.txt
 
-                PERMISOS_HOME=$(sudo ls -lha "${HOME_DIR}" | grep "${LOGIN}$")
+                PERMISOS_HOME=$(sudo ls -lha "${HOME_DIR}" | grep "${LOGIN}")
                 echo "PERMISOS del HOME: ${PERMISOS_HOME}" >> outputs.txt
                 
                 echo "DATOS DEL USUARIO: $(id ${LOGIN})" >> outputs.txt
