@@ -20,7 +20,7 @@ pipeline {
                 script {
                     // Mejoro el manejo de variable como de ambiente
                     env.PASS_TEMPORAL = sh(
-                        script: 'openssl rand -base64 8',
+                        script: 'openssl rand -base64 12',
                         returnStdout: true
                     ).trim()
                 }
@@ -40,7 +40,7 @@ pipeline {
                 fi
 
                 # Creo el usuario
-                sudo useradd "${LOGIN}" -m -s /bin/bash -d "${HOME_DIR}" -c "${NOMBRE_COMPLETO}" -p ${PASS_TEMPORAL}
+                sudo useradd "${LOGIN}" -m -s /bin/bash -d "${HOME_DIR}" -c "${NOMBRE_COMPLETO}" -p $(echo "${PASS_TEMPORAL}" | openssl passwd -1 -stdin)
 
                 # Añadir el usuario al grupo
                 sudo usermod -aG "${DEPARTAMENTO}" "${LOGIN}"
