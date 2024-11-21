@@ -18,6 +18,7 @@ pipeline {
         stage('Crear Usuario') {
             steps {
                 sh '''
+                #!/bin/bash
                 PASS_TEMPORAL="$(openssl rand -base64 8)"
                 HOME_DIR = "/home/${params.LOGIN}"
                 sudo useradd ${param.LOGIN} -m -s /bin/bash -d ${HOME_DIR} -c "${params.NOMBRE_COMPLETO}" -p "${TEMP_PASSWORD}"
