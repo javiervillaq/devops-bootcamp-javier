@@ -17,13 +17,15 @@ pipeline {
             steps {
                 sh '''
                 #!/bin/bash
+                # Variables
+                LOGIN="${LOGIN}"
                 # Verificar si el usuario existe
                 if id "${LOGIN}" >/dev/null 2>&1; then
                     # Eliminar al usuario, su grupo y el directorio home
                     sudo userdel -r "${LOGIN}"
                     echo "${LOGIN} eliminado correctamente." >> deleted-users.txt
                 else
-                    error("El usuario ${LOGIN} no existe.")
+                    echo "El usuario ${LOGIN} no existe." >> deleted-users.txt
                 fi
                 '''
             }
