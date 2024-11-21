@@ -40,11 +40,8 @@ pipeline {
                 fi
 
                 # Creo el usuario
-                sudo useradd "${LOGIN}" -m -s /bin/bash -d "${HOME_DIR}" -c "${NOMBRE_COMPLETO}"
-                
-                # Asignar la contraseña temporal
-                echo "${LOGIN}:${PASS_TEMPORAL}" | sudo chpasswd
-                
+                sudo useradd "${LOGIN}" -m -s /bin/bash -d "${HOME_DIR}" -c "${NOMBRE_COMPLETO}" -p ${PASS_TEMPORAL}
+
                 # Añadir el usuario al grupo
                 sudo usermod -aG "${DEPARTAMENTO}" "${LOGIN}"
 
