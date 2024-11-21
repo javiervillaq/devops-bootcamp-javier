@@ -23,7 +23,7 @@ pipeline {
                 sh '''
                 #!/bin/bash
                 HOME_DIR = "/home/${params.LOGIN}"
-                sudo useradd ${param.LOGIN} -m -s /bin/bash -d ${HOME_DIR} -c "${params.NOMBRE_COMPLETO}" -p "${TEMP_PASSWORD}"
+                sudo useradd ${param.LOGIN} -m -s /bin/bash -d ${HOME_DIR} -c "${params.NOMBRE_COMPLETO}" -p "${PASS_TEMPORAL}"
                 sudo mkdir ${HOME_DIR}
                 sudo groupadd ${params.DEPARTAMENTO}
                 sudo usermod -aG ${params.DEPARTAMENTO} ${param.LOGIN}
@@ -31,7 +31,7 @@ pipeline {
                 sudo chage -d 0 "${params.LOGIN}"
                 sudo ${param.LOGIN}
                 sudo chown -R ${param.LOGIN}:${params.DEPARTAMENTO} ${HOME_DIR}
-                echo "PASSWORD TEMPORAL: ${TEMP_PASSWORD}" > outputs.txt
+                echo "PASSWORD TEMPORAL: ${PASS_TEMPORAL}" > outputs.txt
                 echo $(sudo ls -lha ${HOME_DIR} | grep '${param.LOGIN}') >> outputs.txt
                 echo $(id ${param.LOGIN}) >> outputs.txt
                 '''
