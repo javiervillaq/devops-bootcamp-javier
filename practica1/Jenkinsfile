@@ -1,21 +1,49 @@
 pipeline {
     agent any
     parameters{
-        string(name: 'Login', defaultValue: '', description: 'Es un identificador único que se compone del nombre y el apellido.')
-        string(name: 'Nombre', defaultValue: '', description: 'Nombre del usuario.')
-        string(name: 'Apellido', defaultValue: '', description: 'Apellido del usuario.')
-        choice(name: 'Departamento', choices: ['contabilidad', 'finanzas', 'tecnología'], description: 'Este es el grupo que corresponde al área del usuario.')
+        string(name: 'LOGIN', defaultValue: '', description: 'Es un identificador único que se compone del nombre y el apellido. Sin espacios.')
+        string(name: 'NOMBRE_COMPLETO', defaultValue: '', description: 'Nombre completo del usuario (Nombre y Apellido).')
+        choice(name: 'DEPARTAMENTO', choices: ['contabilidad', 'finanzas', 'tecnología'], description: 'Este es el grupo que corresponde al área del usuario.')
     }
     stages {
-        stage('Input') {
+        stage('Validar Datos') {
             steps {
                 script {
-                    echo "Login: ${params.Login}"
-                    echo "Nombre: ${params.Nombre}"
-                    echo "Apellido: ${params.Apellido}"
-                    echo "Departamento: ${params.Departamento}"
+                    if (!params.LOGIN || !params.NOMBRE_COMPLETO || !params.DEPARTAMENTO) {
+                        error("Todos los parámetros son obligatorios.")
+                    }
                 }
             }
+        }
+        stage('Crear Usuario') {
+            steps {
+                sh '''
+                PASS_TEMPORAL=$(openssl rand -base64 8)
+                HOME_DIR = "/home/${params.LOGIN}"
+                sudo useradd ${param.LOGIN} -m -s /bin/bash -d ${HOME_DIR} -c "${params.NOMBRE_COMPLETO}" -p "${TEMP_PASSWORD}"
+                sudo mkdir ${HOME_DIR}
+                sudo groupadd ${params.DEPARTAMENTO}
+                sudo usermod -aG ${params.DEPARTAMENTO} ${param.LOGIN}
+                id ${param.LOGIN}
+                sudo chage -d 0 "${params.LOGIN}"
+                sudo ${param.LOGIN}
+                sudo chown -R ${param.LOGIN}:${params.DEPARTAMENTO} ${HOME_DIR}
+                echo "PASSWORD TEMPORAL: ${TEMP_PASSWORD}" > outputs.txt
+                echo $(sudo ls -lha ${HOME_DIR} | grep '${param.LOGIN}') >> outputs.txt
+                echo $(id ${param.LOGIN}) >> outputs.txt
+                '''
+            }
+        }
+    }
+    post {
+        always {
+            archiveArtifacts artifacts: 'outputs.txt', onlyIfSuccessful: true
+        }
+        success {
+            echo "Usuario creado con éxito. La contraseña temporal está disponible en los artefactos."
+        }
+        failure {
+            echo "Error durante la creación del usuario."
         }
     }
 }
