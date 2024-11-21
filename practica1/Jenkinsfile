@@ -1,0 +1,21 @@
+pipeline {
+    agent any
+    parameters{
+        string(name: 'Login', defaultValue: '', description: 'Es un identificador único que se compone del nombre y el apellido.')
+        string(name: 'Nombre', defaultValue: '', description: 'Nombre del usuario.')
+        string(name: 'Apellido', defaultValue: '', description: 'Apellido del usuario.')
+        choice(name: 'Departamento', choices: ['contabilidad', 'finanzas', 'tecnología'], description: 'Este es el grupo que corresponde al área del usuario.')
+    }
+    stages {
+        stage('Input') {
+            steps {
+                script {
+                    echo "Login: ${params.Login}"
+                    echo "Nombre: ${params.Nombre}"
+                    echo "Apellido: ${params.Apellido}"
+                    echo "Departamento: ${params.Departamento}"
+                }
+            }
+        }
+    }
+}
