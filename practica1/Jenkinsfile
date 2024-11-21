@@ -18,22 +18,46 @@ pipeline {
         stage('Crear Usuario') {
             steps {
                 script {
-                    PASS_TEMPORAL = sh 'echo $(openssl rand -base64 8)'
+                    // Mejoro el manejo de variable como de ambiente
+                    env.PASS_TEMPORAL = sh(
+                        script: 'openssl rand -base64 8',
+                        returnStdout: true
+                    ).trim()
                 }
                 sh '''
                 #!/bin/bash
-                HOME_DIR = "/home/${params.LOGIN}"
-                sudo useradd ${param.LOGIN} -m -s /bin/bash -d ${HOME_DIR} -c "${params.NOMBRE_COMPLETO}" -p "${PASS_TEMPORAL}"
-                sudo mkdir ${HOME_DIR}
-                sudo groupadd ${params.DEPARTAMENTO}
-                sudo usermod -aG ${params.DEPARTAMENTO} ${param.LOGIN}
-                id ${param.LOGIN}
-                sudo chage -d 0 "${params.LOGIN}"
-                sudo ${param.LOGIN}
-                sudo chown -R ${param.LOGIN}:${params.DEPARTAMENTO} ${HOME_DIR}
+
+                # Variables del script
+                LOGIN="${LOGIN}"
+                NOMBRE_COMPLETO="${NOMBRE_COMPLETO}"
+                DEPARTAMENTO="${DEPARTAMENTO}"
+                PASS_TEMPORAL="${PASS_TEMPORAL}"
+                HOME_DIR="/home/${LOGIN}"
+
+                # Creo el grupo si no existe
+                if ! getent group "${DEPARTAMENTO}" >/dev/null; then
+                    sudo groupadd "${DEPARTAMENTO}"
+                fi
+
+                # Creo el usuario
+                sudo useradd "${LOGIN}" -m -s /bin/bash -d "${HOME_DIR}" -c "${NOMBRE_COMPLETO}"
+                
+                # Asignar la contraseña temporal
+                echo "${LOGIN}:${PASS_TEMPORAL}" | sudo chpasswd
+                
+                # Añadir el usuario al grupo
+                sudo usermod -aG "${DEPARTAMENTO}" "${LOGIN}"
+
+                # Forzar cambio de contraseña en el próximo inicio de sesión
+                sudo chage -d 0 "${LOGIN}"
+
+                # Configurar permisos del directorio home
+                sudo chown -R "${LOGIN}:${DEPARTAMENTO}" "${HOME_DIR}"
+
+                # Salidas de validación
                 echo "PASSWORD TEMPORAL: ${PASS_TEMPORAL}" > outputs.txt
-                echo $(sudo ls -lha ${HOME_DIR} | grep '${param.LOGIN}') >> outputs.txt
-                echo $(id ${param.LOGIN}) >> outputs.txt
+                echo "PERMISOS del HOME: $(sudo ls -lha ${HOME_DIR})" >> outputs.txt
+                echo "DATOS DEL USUARIO: $(id ${LOGIN})" >> outputs.txt
                 '''
             }
         }
