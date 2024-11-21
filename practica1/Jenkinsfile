@@ -17,10 +17,9 @@ pipeline {
         }
         stage('Crear Usuario') {
             steps {
+                PASS_TEMPORAL = sh 'openssl rand -base64 8'
                 sh '''
                 #!/bin/bash
-                bash -c '
-                PASS_TEMPORAL=$(openssl rand -base64 8)
                 HOME_DIR = "/home/${params.LOGIN}"
                 sudo useradd ${param.LOGIN} -m -s /bin/bash -d ${HOME_DIR} -c "${params.NOMBRE_COMPLETO}" -p "${TEMP_PASSWORD}"
                 sudo mkdir ${HOME_DIR}
@@ -33,7 +32,6 @@ pipeline {
                 echo "PASSWORD TEMPORAL: ${TEMP_PASSWORD}" > outputs.txt
                 echo $(sudo ls -lha ${HOME_DIR} | grep '${param.LOGIN}') >> outputs.txt
                 echo $(id ${param.LOGIN}) >> outputs.txt
-                '
                 '''
             }
         }
