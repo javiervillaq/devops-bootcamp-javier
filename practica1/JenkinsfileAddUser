@@ -52,7 +52,8 @@ pipeline {
                 sudo chown -R "${LOGIN}:${DEPARTAMENTO}" "${HOME_DIR}"
 
                 # Salidas de validación
-                echo "PASSWORD TEMPORAL: ${PASS_TEMPORAL}" > outputs.txt
+                echo "-----------------------------------------------------------" >> outputs.txt
+                echo "PASSWORD TEMPORAL ${LOGIN}: ${PASS_TEMPORAL}" >> outputs.txt
 
                 PERMISOS_HOME=$(sudo ls -lha /home | grep "${LOGIN}")
                 echo "PERMISOS del HOME: ${PERMISOS_HOME}" >> outputs.txt
